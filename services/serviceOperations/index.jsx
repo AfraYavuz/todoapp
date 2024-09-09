@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/prisma"; // Named import
+import prisma from "@/lib/prisma/index";
 
 // GET ALL
-export async function getAllData() {
+export async function getAllData(todo) {
   try {
-    const data = await prisma.todo.findMany();
+    const data = await prisma[todo].findMany();
     return data;
   } catch (error) {
     return { error: error.message };
@@ -11,11 +11,9 @@ export async function getAllData() {
 }
 
 // POST
-export async function createNewData(newData) {
+export async function createNewData(todo, newData) {
   try {
-    const data = await prisma.todo.create({
-      data: newData,
-    });
+    const data = await prisma[todo].create({ data: newData });
     return data;
   } catch (error) {
     return { error: error.message };
@@ -23,10 +21,10 @@ export async function createNewData(newData) {
 }
 
 // UPDATE
-export async function updateDataByAny(id, newData) {
+export async function updateDataByAny(todo, where, newData) {
   try {
-    const data = await prisma.todo.update({
-      where: { id },
+    const data = await prisma[todo].update({
+      where: where,
       data: newData,
     });
     return data;
@@ -36,15 +34,18 @@ export async function updateDataByAny(id, newData) {
 }
 
 // DELETE
-export async function deleteDataByAny(id) {
+export async function deleteDataByAny(todo, where) {
   try {
-    const data = await prisma.todo.delete({
-      where: { id },
-    });
+    const data = await prisma[todo].delete({ where: where });
     return data;
   } catch (error) {
     return { error: error.message };
   }
 }
 
-export default { getAllData, createNewData, updateDataByAny, deleteDataByAny };
+export default {
+  getAllData,
+  createNewData,
+  updateDataByAny,
+  deleteDataByAny,
+};
