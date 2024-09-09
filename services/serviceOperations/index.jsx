@@ -1,4 +1,4 @@
-import { prisma } from "@/utils/prisma"; // Named import
+import { prisma } from "@/lib/prisma"; // Named import
 
 // GET ALL
 export async function getAllData() {
