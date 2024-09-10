@@ -1,148 +1,117 @@
 const postAPI = async (
   URL,
-  body = {},
+  body,
   method = "POST",
   headers = { "Content-Type": "application/json" }
 ) => {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("API URL ortam değişkeni bulunamadı!");
+    if (!process.env.NEXT_PUBLIC_API_URL || !URL) {
+      throw new Error("URL bulunamadı!");
     }
-    if (!URL) {
-      throw new Error("URL parametresi bulunamadı!");
-    }
-    if (!body || typeof body !== "object") {
-      throw new Error("Geçersiz body verisi!");
-    }
-
-    const response = await fetch(`${apiUrl}${URL}`, {
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL + URL}`, {
       method: method,
       headers: headers,
       body: JSON.stringify(body),
       cache: "no-store",
-    });
+    })
+      .then((res) => {
+        if (res.url.includes("/notification") && res.redirected) {
+          return (window.location.href = res.url);
+        } else {
+          return res.json();
+        }
+      })
+      .catch((err) => console.log(err));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `API request failed with status ${response.status}: ${
-          errorData.message || response.statusText
-        }`
-      );
-    }
-
-    return response.json();
+    return data;
   } catch (err) {
-    console.error(`API request failed: ${err}`);
-    throw err;
+    throw new Error(`API request failed: ${err}`);
   }
 };
 
+// GET
 const getAPI = async (
   URL,
   headers = { "Content-Type": "application/json" }
 ) => {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("API URL ortam değişkeni bulunamadı!");
-    }
-    if (!URL) {
-      throw new Error("URL parametresi bulunamadı!");
-    }
+  const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL + URL}`, {
+    method: "GET",
+    headers: headers,
+    cache: "no-store",
+  })
+    .then((res) => {
+      if (res.redirected) {
+        // bazı yerlerde window'u bulamıyor kontrol et
+        //return window.location.href = res.url;
+      } else {
+        return res.json();
+      }
+    })
+    .catch((err) => console.log(err));
 
-    const response = await fetch(`${apiUrl}${URL}`, {
-      method: "GET",
-      headers: headers,
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `API request failed with status ${response.status}: ${
-          errorData.message || response.statusText
-        }`
-      );
-    }
-
-    return response.json();
-  } catch (err) {
-    console.error(`API request failed: ${err}`);
-    throw err;
-  }
+  return data;
 };
 
-const deleteAPI = async (URL) => {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("API URL ortam değişkeni bulunamadı!");
-    }
-    if (!URL) {
-      throw new Error("URL parametresi bulunamadı!");
-    }
-
-    const response = await fetch(`${apiUrl}${URL}`, {
-      method: "DELETE",
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `API request failed with status ${response.status}: ${
-          errorData.message || response.statusText
-        }`
-      );
-    }
-
-    return response.json();
-  } catch (err) {
-    console.error(`API request failed: ${err}`);
-    throw err;
-  }
-};
-
+// PUT
 const putAPI = async (
   URL,
-  body = {},
+  body,
+  method = "PUT",
   headers = { "Content-Type": "application/json" }
 ) => {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error("API URL ortam değişkeni bulunamadı!");
+    if (!process.env.NEXT_PUBLIC_API_URL || !URL) {
+      throw new Error("URL bulunamadı!");
     }
-    if (!URL) {
-      throw new Error("URL parametresi bulunamadı!");
-    }
-    if (!body || typeof body !== "object") {
-      throw new Error("Geçersiz body verisi!");
-    }
-
-    const response = await fetch(`${apiUrl}${URL}`, {
-      method: "PUT",
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL + URL}`, {
+      method: method,
       headers: headers,
       body: JSON.stringify(body),
       cache: "no-store",
-    });
+    })
+      .then((res) => {
+        if (res.url.includes("/notification") && res.redirected) {
+          return (window.location.href = res.url);
+        } else {
+          return res.json();
+        }
+      })
+      .catch((err) => console.log(err));
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `API request failed with status ${response.status}: ${
-          errorData.message || response.statusText
-        }`
-      );
-    }
-
-    return response.json();
+    return data;
   } catch (err) {
-    console.error(`API request failed: ${err}`);
-    throw err;
+    throw new Error(`API request failed: ${err}`);
   }
 };
 
-export { postAPI, getAPI, deleteAPI, putAPI };
+// DELETE
+const deleteAPI = async (
+  URL,
+  method = "DELETE",
+  headers = { "Content-Type": "application/json" }
+) => {
+  try {
+    if (!process.env.NEXT_PUBLIC_API_URL || !URL) {
+      throw new Error("URL bulunamadı!");
+    }
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_URL + URL}`, {
+      method: method,
+      headers: headers,
+      cache: "no-store",
+    })
+      .then((res) => {
+        if (res.url.includes("/notification") && res.redirected) {
+          return (window.location.href = res.url);
+        } else {
+          return res.json();
+        }
+      })
+      .catch((err) => console.log(err));
+
+    return data;
+  } catch (err) {
+    throw new Error(`API request failed: ${err}`);
+  }
+};
+
+export { postAPI, getAPI, putAPI, deleteAPI };

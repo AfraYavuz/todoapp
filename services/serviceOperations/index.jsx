@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma/index";
 
 // GET ALL
-export async function getAllData(todo) {
+export async function getAllData(tableName) {
   try {
-    const data = await prisma[todo].findMany();
+    const data = await prisma[tableName].findMany();
     return data;
   } catch (error) {
     return { error: error.message };
@@ -11,20 +11,20 @@ export async function getAllData(todo) {
 }
 
 // POST
-export async function createNewData(todo, newData) {
+export async function createNewData(tableName, newData) {
   try {
-    const data = await prisma[todo].create({ data: newData });
+    const data = await prisma[tableName].create({ data: newData });
     return data;
   } catch (error) {
     return { error: error.message };
   }
 }
 
-// UPDATE
-export async function updateDataByAny(todo, where, newData) {
+// PUT (UPDATE)
+export async function updateData(tableName, id, newData) {
   try {
-    const data = await prisma[todo].update({
-      where: where,
+    const data = await prisma[tableName].update({
+      where: { id: id },
       data: newData,
     });
     return data;
@@ -34,9 +34,11 @@ export async function updateDataByAny(todo, where, newData) {
 }
 
 // DELETE
-export async function deleteDataByAny(todo, where) {
+export async function deleteData(tableName, id) {
   try {
-    const data = await prisma[todo].delete({ where: where });
+    const data = await prisma[tableName].delete({
+      where: { id: id },
+    });
     return data;
   } catch (error) {
     return { error: error.message };
@@ -46,6 +48,6 @@ export async function deleteDataByAny(todo, where) {
 export default {
   getAllData,
   createNewData,
-  updateDataByAny,
-  deleteDataByAny,
+  updateData,
+  deleteData,
 };
