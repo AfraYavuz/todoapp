@@ -1,13 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getAPI, postAPI, putAPI, deleteAPI } from "@/services/fetchAPI";
-import { FaEdit, FaTrash, FaCheck, FaUndo } from "react-icons/fa";
+import { TiPlusOutline } from "react-icons/ti";
+import { GrEdit } from "react-icons/gr";
+import { RiDeleteBin2Fill } from "react-icons/ri";
 
 export default function Home() {
   const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [editTitle, setEditTitle] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [category, setCategory] = useState("toStart");
+  const [selectedCategory, setSelectedCategory] = useState("toStart");
+
+  const filteredTodos = todos.filter(
+    (todo) => todo.category === selectedCategory
+  );
 
   useEffect(() => {
     async function fetchTodos() {
@@ -20,19 +27,36 @@ export default function Home() {
   }, []);
 
   const handleAddTodo = async () => {
-    if (newTodo.trim()) {
-      await postAPI("/post", { task: newTodo, isCompleted: false });
-      setNewTodo("");
-      // Refresh the list
-      const data = await getAPI("/get");
-      if (data && data.status === "success") {
-        setTodos(data.data);
+    if (newTitle.trim() && newDescription.trim()) {
+      try {
+        const response = await postAPI("/post", {
+          title: newTitle,
+          description: newDescription,
+          isCompleted: false,
+        });
+        console.log("API yanıtı:", response);
+        if (response.status === "success") {
+          setNewTitle("");
+          setNewDescription("");
+          // Refresh the list
+          const data = await getAPI("/get");
+          if (data && data.status === "success") {
+            setTodos(data.data);
+          }
+        } else {
+          console.error("Todo eklenemedi:", response.error);
+        }
+      } catch (error) {
+        console.error("POST isteği sırasında hata:", error);
       }
     }
   };
 
-  const handleUpdateTodo = async (id, updatedTask) => {
-    await putAPI(`/put/${id}`, { task: updatedTask });
+  const handleUpdateTodo = async (id, updatedTitle, updatedDescription) => {
+    await putAPI(`/put/${id}`, {
+      title: updatedTitle,
+      description: updatedDescription,
+    });
     // Refresh the list
     const data = await getAPI("/get");
     if (data && data.status === "success") {
@@ -48,97 +72,81 @@ export default function Home() {
       setTodos(data.data);
     }
   };
-  const handleToggleCompleted = async (id, isCompleted) => {
-    await handleUpdateTodo(id, { isCompleted: !isCompleted });
-  };
-
-  const handleSaveEdit = async (id) => {
-    await handleUpdateTodo(id, { title: editTitle });
-    setEditingId(null);
-    setEditTitle("");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditTitle("");
-  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="text-4xl font-bold mb-8">Todo List</h1>
-      <div className="flex items-center mb-4">
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          className="p-2 border rounded bg-white text-black shadow-md"
-          placeholder="Add a new todo"
-        />
-        <button
-          onClick={handleAddTodo}
-          className="ml-2 p-2 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600"
-        >
-          Add Todo
-        </button>
-      </div>
-      <ul className="w-full max-w-md">
-        {todos.map((todo) => (
-          <li
-            key={todo.id}
-            className="flex justify-between items-center p-2 bg-white rounded shadow mb-2"
-          >
-            {editingId === todo.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="p-2 border rounded bg-white text-black shadow-md"
-                />
-                <button
-                  onClick={() => handleSaveEdit(todo.id)}
-                  className="ml-2 p-2 bg-blue-500 text-white rounded shadow-md hover:bg-blue-600"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={handleCancelEdit}
-                  className="ml-2 p-2 bg-gray-500 text-white rounded shadow-md hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <span className={`${todo.isCompleted ? "line-through" : ""}`}>
-                  {todo.title}
-                </span>
+    <main className="flex flex-row min-h-screen gap-5 p-10">
+      <div className="flex flex-col  text-start">
+        <h1 className="text-4xl font-bold m-5 uppercase truncate">Todo List</h1>
+        <div className="flex flex-col mb-4">
+          <input
+            type="text"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            className="p-2 border rounded bg-white text-black mb-2"
+            placeholder="Add a new title"
+          />
+          <textarea
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            className="p-2 border rounded bg-white text-black mb-2"
+            placeholder="Add a description"
+          />
+          <div className=" flex justify-end mt-2">
+            <button
+              onClick={handleAddTodo}
+              className="p-2 bg-amber-300 text-black rounded hover:bg-red-400"
+            >
+              <TiPlusOutline />
+            </button>
+          </div>
+        </div>
+      </div>{" "}
+      <div className="flex  w-full ml-20 mt-5">
+        <ul className="flex flex-col gap-4 w-60 h-60">
+          {filteredTodos.map((todo) => (
+            <li
+              key={todo.id}
+              className="flex flex-col p-2 bg-white text-black rounded shadow mb-2"
+            >
+              <span
+                className={`${
+                  todo.isCompleted ? "line-through" : ""
+                } font-bold`}
+              >
+                {todo.title}
+              </span>
+              <p className="text-gray-700">{todo.description}</p>
+              <div className="flex justify-end mt-2">
                 <button
                   onClick={() => {
-                    setEditingId(todo.id);
-                    setEditTitle(todo.title);
+                    const updatedTitle = prompt("Update title", todo.title);
+                    const updatedDescription = prompt(
+                      "Update description",
+                      todo.description
+                    );
+                    if (updatedTitle !== null && updatedDescription !== null) {
+                      handleUpdateTodo(
+                        todo.id,
+                        updatedTitle,
+                        updatedDescription
+                      );
+                    }
                   }}
-                  className="ml-2 p-2 bg-yellow-500 text-white rounded shadow-md hover:bg-yellow-600"
+                  className="ml-2 p-2 bg-teal-400 text-black rounded shadow-md hover:bg-teal-600"
                 >
-                  <FaEdit />
+                  <GrEdit />
                 </button>
-              </>
-            )}
-            <button
-              onClick={() => handleToggleCompleted(todo.id, todo.isCompleted)}
-              className="ml-2 p-2 bg-green-500 text-white rounded shadow-md hover:bg-green-600"
-            >
-              {todo.isCompleted ? <FaUndo /> : <FaCheck />}
-            </button>
-            <button
-              onClick={() => handleDeleteTodo(todo.id)}
-              className="ml-2 p-2 bg-red-500 text-white rounded shadow-md hover:bg-red-600"
-            >
-              <FaTrash />
-            </button>
-          </li>
-        ))}
-      </ul>
+                <button
+                  onClick={() => handleDeleteTodo(todo.id)}
+                  className="ml-2 p-2 bg-red-400 text-black rounded shadow-md hover:bg-red-600"
+                >
+                  <RiDeleteBin2Fill />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </main>
   );
 }

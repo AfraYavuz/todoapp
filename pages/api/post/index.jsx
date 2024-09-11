@@ -4,6 +4,7 @@ const handler = async (req, res) => {
   if (req.method === "POST") {
     try {
       const body = req.body;
+      console.log("Alınan body:", body); // Body'nin sunucu tarafında alınıp alınmadığını kontrol edin
       if (!body) {
         throw new Error("Request body is missing");
       }
